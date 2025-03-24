@@ -3,6 +3,18 @@ const gtts = require('node-gtts');
 const path = require('path');
 const fs = require('fs');
 const app = express();
+// Enable CORS (allows your frontend to talk to the backend)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
+  
+  // Handle preflight requests (browsers send these first)
+  app.options('/api/tts', (req, res) => {
+    res.sendStatus(200);
+  });
 
 app.use(express.json());
 app.use(express.static('.'));
@@ -13,21 +25,15 @@ const TEMP_DIR = '/tmp';
 app.post('/api/tts', (req, res) => {
     const { text, lang = 'en' } = req.body;
     
-    // Create temporary file path in /tmp
-    const tempFile = path.join(TEMP_DIR, `speech-${Date.now()}.mp3`);
+    // Use /tmp directory which is writable in Vercel
+    const tempFile = `/tmp/speech-${Date.now()}.mp3`;
     
-    // Initialize TTS with specified language
     const tts = gtts(lang);
     
-    // Create MP3 file
     tts.save(tempFile, text, () => {
-        // Send file to client
         res.download(tempFile, 'speech.mp3', (err) => {
-            // Delete temporary file after sending
-            fs.unlink(tempFile, (deleteErr) => {
-                if (deleteErr) console.error('Error deleting temp file:', deleteErr);
-            });
-            
+            // Delete the temp file when done
+            fs.unlink(tempFile, () => {});
             if (err) console.error('Error sending file:', err);
         });
     });

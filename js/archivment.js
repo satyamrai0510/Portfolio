@@ -136,7 +136,7 @@ function textToSpeech(text) {
         },
         body: JSON.stringify({
             text: text,
-            lang: utterance.voice?.lang?.split('-')[0] || 'en' // Fallback to English
+            lang: utterance.voice?.lang?.split('-')[0] || 'en'
         })
     })
     .then(response => {
