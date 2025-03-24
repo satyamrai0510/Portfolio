@@ -5,19 +5,16 @@ const fs = require('fs');
 const app = express();
 
 app.use(express.json());
-app.use(express.static('.')); // Serve static files from root directory
+app.use(express.static('.'));
 
-// TTS endpoint
+// Use /tmp directory which is writable in Vercel
+const TEMP_DIR = '/tmp';
+
 app.post('/api/tts', (req, res) => {
     const { text, lang = 'en' } = req.body;
     
-    // Create temporary file path
-    const tempFile = path.join('temp', `speech-${Date.now()}.mp3`);
-    
-    // Ensure temp directory exists
-    if (!fs.existsSync('temp')) {
-        fs.mkdirSync('temp');
-    }
+    // Create temporary file path in /tmp
+    const tempFile = path.join(TEMP_DIR, `speech-${Date.now()}.mp3`);
     
     // Initialize TTS with specified language
     const tts = gtts(lang);
@@ -39,4 +36,4 @@ app.post('/api/tts', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-}); 
+});

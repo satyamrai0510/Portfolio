@@ -136,12 +136,12 @@ function textToSpeech(text) {
         },
         body: JSON.stringify({
             text: text,
-            lang: utterance.voice.lang.split('-')[0] // Use language code from selected voice
+            lang: utterance.voice?.lang?.split('-')[0] || 'en' // Fallback to English
         })
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`Server responded with ${response.status}`);
         }
         return response.blob();
     })
@@ -163,7 +163,7 @@ function textToSpeech(text) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to generate speech file. Please try again.');
+        alert('Failed to generate speech file. Please try again later.');
     });
 
     synth.speak(utterance);
